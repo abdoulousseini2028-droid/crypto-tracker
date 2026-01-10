@@ -1,0 +1,652 @@
+<html>
+<head>
+    <title>Crypto Data Tracker</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #ffffff;
+            color: #000000;
+            line-height: 1.6;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 40px;
+            border-bottom: 2px solid #000000;
+            padding-bottom: 10px;
+        }
+        
+        .section {
+            background: #ffffff;
+            border: 1px solid #000000;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .description {
+            color: #666666;
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+        
+        .real-time-price {
+            font-size: 36px;
+            font-weight: 700;
+            margin: 30px 0;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .countdown {
+            text-align: center;
+            color: #666666;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+        
+        button {
+            background: #000000;
+            color: #ffffff;
+            border: none;
+            padding: 12px 24px;
+            font-size: 14px;
+            cursor: pointer;
+            margin: 5px 5px 5px 0;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        button:hover {
+            background: #333333;
+        }
+        
+        button.secondary {
+            background: #ffffff;
+            color: #000000;
+            border: 1px solid #000000;
+        }
+        
+        button.secondary:hover {
+            background: #f0f0f0;
+        }
+        
+        input, select {
+            border: 1px solid #000000;
+            padding: 10px;
+            font-size: 14px;
+            margin: 5px 5px 5px 0;
+            background: #ffffff;
+        }
+        
+        input:focus, select:focus {
+            outline: 2px solid #000000;
+            outline-offset: 2px;
+        }
+        
+        textarea {
+            width: 100%;
+            border: 1px solid #000000;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            background: #fafafa;
+            resize: vertical;
+        }
+        
+        textarea:focus {
+            outline: 2px solid #000000;
+            outline-offset: 2px;
+        }
+        
+        .chart-container {
+            width: 100%;
+            height: 400px;
+            margin: 30px 0;
+            border: 1px solid #000000;
+            padding: 20px;
+            background: #ffffff;
+        }
+        
+        .chart-wrapper {
+            position: relative;
+            height: 100%;
+        }
+        
+        .flex-container {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .left-panel {
+            flex: 0 0 35%;
+        }
+        
+        .right-panel {
+            flex: 1;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .info-text {
+            font-size: 11px;
+            color: #999999;
+            margin-top: 3px;
+            font-style: italic;
+        }
+        
+        .status {
+            padding: 15px;
+            border-left: 3px solid #000000;
+            background: #f5f5f5;
+            margin: 20px 0;
+            font-size: 13px;
+        }
+        
+        .status.error {
+            border-left-color: #000000;
+            background: #f0f0f0;
+        }
+        
+        .status.success {
+            border-left-color: #000000;
+            background: #fafafa;
+        }
+        
+        hr {
+            border: none;
+            border-top: 1px solid #cccccc;
+            margin: 25px 0;
+        }
+        
+        input[readonly] {
+            background: #f5f5f5;
+            color: #666666;
+        }
+        
+        .chart-controls {
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .flex-container {
+                flex-direction: column;
+            }
+            
+            .left-panel {
+                flex: 1;
+            }
+            
+            body {
+                padding: 20px 15px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .real-time-price {
+                font-size: 28px;
+            }
+            
+            .chart-container {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Cryptocurrency Data Tracker</h1>
+        
+        <div class="section">
+            <h2>Real-Time Price Monitor</h2>
+            <p class="description">Live exchange rates updated every 10 seconds</p>
+            
+            <div>
+                <label>From</label>
+                <input id="realtimeCrypto" value="BTC" size="5">
+                
+                <label>To</label>
+                <input id="realtimeFiat" value="USD" size="5">
+                
+                <button onclick="startRealtime()">Start Tracking</button>
+                <button class="secondary" onclick="stopRealtime()">Stop</button>
+            </div>
+            
+            <p id='info' class="real-time-price">Initializing...</p>
+            <p id='infotime' class="countdown"></p>
+            <div id="realtimeStatus" class="status" style="display:none;"></div>
+        </div>
+
+        <div class="section">
+            <h2>Historical Data Analysis</h2>
+            <p class="description">Download and visualize historical cryptocurrency data</p>
+            
+            <div class="flex-container">
+                <div class="left-panel">
+                    <div class="form-group">
+                        <label>Cryptocurrency</label>
+                        <input id='cryptoCurr' value='BTC' size="8" placeholder="BTC, ETH, SOL">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Timeframe</label>
+                        <select id="timeframe">
+                            <option value="histominute">Per Minute</option>
+                            <option value="histohour" selected>Hourly</option>
+                            <option value="histoday">Daily</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Number of Records</label>
+                        <input id="limit" value="100" size="8" type="number" min="1" max="2000">
+                        <div class="info-text">Maximum 2000 per request</div>
+                    </div>
+                    
+                    <button onclick='getHistoricalData()'>Get Latest Data</button>
+                    
+                    <div id="statusBox" style="display:none;"></div>
+                    
+                    <div class="form-group" style="margin-top: 25px;">
+                        <label>From</label>
+                        <input id='fromTime' value='—' size="15" readonly>
+                        <div id='fromInfo' class="info-text"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>To</label>
+                        <input id='toTime' value='—' size="15" readonly>
+                        <div id='toInfo' class="info-text"></div>
+                    </div>
+                    
+                    <button onclick='getPreviousData()'>Get Previous Period</button>
+                    
+                    <hr>
+                    
+                    <div class="chart-controls">
+                        <label>Chart Type</label>
+                        <select id="chartType" onchange="updateChart()">
+                            <option value="linear">Linear Scale</option>
+                            <option value="logarithmic">Logarithmic Scale</option>
+                        </select>
+                    </div>
+                    
+                    <button class="secondary" onclick='restartData()'>Restart & Clear</button>
+                    <button onclick='downloadData()'>Download CSV</button>
+                </div>
+                
+                <div class="right-panel">
+                    <div class="chart-container">
+                        <div class="chart-wrapper">
+                            <canvas id="priceChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <label>Raw Data Output</label>
+                    <textarea id="txtout" rows="20" placeholder="Historical data will appear here...
+
+Click 'Get Latest Data' to retrieve cryptocurrency data.
+Click 'Get Previous Period' to go back in time.
+
+Format: Timestamp | Date | Price (USD)"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let realtimeInterval = null;
+        let tcount = 0;
+        let priceChart = null;
+        let chartData = { dates: [], prices: [] };
+
+        const getBtcData = async () => {
+            const crypto = (document.getElementById('realtimeCrypto').value || 'BTC').toUpperCase();
+            const fiat = (document.getElementById('realtimeFiat').value || 'USD').toUpperCase();
+            
+            const statusEl = document.getElementById('realtimeStatus');
+            
+            try {
+                const url = `https://min-api.cryptocompare.com/data/price?fsym=${crypto}&tsyms=${fiat}`;
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.Response === 'Error') {
+                    throw new Error(data.Message);
+                }
+                
+                if (data[fiat]) {
+                    document.getElementById("info").innerHTML = `1 ${crypto} = ${data[fiat].toLocaleString()} ${fiat}`;
+                    statusEl.style.display = 'none';
+                } else {
+                    throw new Error('Invalid crypto/fiat pair');
+                }
+            } catch (error) {
+                console.error('Fetch Error:', error);
+                document.getElementById("info").innerHTML = 'Error loading price';
+                statusEl.className = 'status error';
+                statusEl.style.display = 'block';
+                statusEl.innerHTML = `Error: ${error.message}. Make sure you are using Live Server in VS Code.`;
+            }
+        };
+
+        function startRealtime() {
+            stopRealtime();
+            getBtcData();
+            tcount = 0;
+            
+            realtimeInterval = setInterval(function() {
+                tcount++;
+                if (tcount >= 10) {
+                    getBtcData();
+                    tcount = 0;
+                }
+                document.getElementById("infotime").innerHTML = 'Next update in ' + (10 - tcount) + ' seconds';
+            }, 1000);
+        }
+
+        function stopRealtime() {
+            if (realtimeInterval) {
+                clearInterval(realtimeInterval);
+                realtimeInterval = null;
+                document.getElementById("infotime").innerHTML = 'Tracking stopped';
+            }
+        }
+
+        window.addEventListener('load', () => {
+            initializeChart();
+            startRealtime();
+        });
+
+        function initializeChart() {
+            const ctx = document.getElementById('priceChart').getContext('2d');
+            priceChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Price (USD)',
+                        data: [],
+                        borderColor: '#000000',
+                        backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.1,
+                        pointRadius: 0,
+                        pointHoverRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: {
+                                color: '#000000'
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Price Over Time',
+                            color: '#000000',
+                            font: {
+                                size: 16,
+                                weight: 'bold'
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            ticks: {
+                                color: '#000000'
+                            },
+                            grid: {
+                                color: '#e0e0e0'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#000000',
+                                maxRotation: 45,
+                                minRotation: 45
+                            },
+                            grid: {
+                                color: '#e0e0e0'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateChart() {
+            const chartType = document.getElementById('chartType').value;
+            
+            priceChart.options.scales.y.type = chartType;
+            priceChart.update();
+        }
+
+        const getHistoricalData = async () => {
+            const crypto = (document.getElementById('cryptoCurr').value || 'BTC').toUpperCase();
+            const timeframe = document.getElementById('timeframe').value;
+            const limit = Math.min(Math.max(parseInt(document.getElementById('limit').value) || 100, 1), 2000);
+            
+            const statusBox = document.getElementById('statusBox');
+            statusBox.className = 'status';
+            statusBox.style.display = 'block';
+            statusBox.innerHTML = 'Fetching data...';
+            
+            try {
+                const url = `https://min-api.cryptocompare.com/data/v2/${timeframe}?fsym=${crypto}&tsym=USD&limit=${limit}`;
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error status: ${response.status}`);
+                }
+                
+                const json = await response.json();
+                
+                if (json.Response === 'Error') {
+                    throw new Error(json.Message || 'API error');
+                }
+                
+                if (!json.Data || !json.Data.Data) {
+                    throw new Error('No data returned');
+                }
+                
+                const data = json.Data.Data;
+                const times = data.map(obj => obj.time);
+                const prices = data.map(obj => obj.high);
+                
+                // Store data for chart
+                chartData.dates = times.map(t => new Date(t * 1000).toLocaleString());
+                chartData.prices = prices;
+                
+                // Update chart
+                priceChart.data.labels = chartData.dates;
+                priceChart.data.datasets[0].data = chartData.prices;
+                priceChart.data.datasets[0].label = `${crypto} Price (USD)`;
+                priceChart.update();
+                
+                // Update text area
+                let txt = "Timestamp\tDate\tPrice (USD)\n";
+                for (let i = 0; i < times.length; i++) {
+                    const date = new Date(times[i] * 1000);
+                    txt += times[i] + "\t" + 
+                           date.toISOString().replace('T', ' ').substr(0, 19) + "\t" + 
+                           prices[i] + "\n";
+                }
+                
+                document.getElementById("txtout").value = txt;
+                document.getElementById("fromTime").value = times[0];
+                document.getElementById("toTime").value = times[times.length - 1];
+                
+                const fromDate = new Date(times[0] * 1000);
+                const toDate = new Date(times[times.length - 1] * 1000);
+                
+                document.getElementById("fromInfo").innerHTML = fromDate.toLocaleString();
+                document.getElementById("toInfo").innerHTML = toDate.toLocaleString();
+                
+                statusBox.className = 'status success';
+                statusBox.innerHTML = `Successfully loaded ${times.length} data points`;
+            } catch (error) {
+                console.error('Fetch Error:', error);
+                statusBox.className = 'status error';
+                statusBox.innerHTML = `Error: ${error.message}. Make sure you are using Live Server in VS Code.`;
+            }
+        };
+
+        const getPreviousData = async () => {
+            const crypto = (document.getElementById('cryptoCurr').value || 'BTC').toUpperCase();
+            const timeframe = document.getElementById('timeframe').value;
+            const limit = Math.min(Math.max(parseInt(document.getElementById('limit').value) || 100, 1), 2000);
+            const fromTime = document.getElementById('fromTime').value;
+            
+            if (fromTime === '—' || !fromTime) {
+                alert('Please get latest data first');
+                return;
+            }
+            
+            const statusBox = document.getElementById('statusBox');
+            statusBox.className = 'status';
+            statusBox.style.display = 'block';
+            statusBox.innerHTML = 'Fetching previous period...';
+            
+            try {
+                const url = `https://min-api.cryptocompare.com/data/v2/${timeframe}?fsym=${crypto}&tsym=USD&limit=${limit}&toTs=${fromTime}`;
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error status: ${response.status}`);
+                }
+                
+                const json = await response.json();
+                
+                if (json.Response === 'Error') {
+                    throw new Error(json.Message || 'API error');
+                }
+                
+                if (!json.Data || !json.Data.Data) {
+                    throw new Error('No data returned');
+                }
+                
+                const data = json.Data.Data;
+                const times = data.map(obj => obj.time);
+                const prices = data.map(obj => obj.high);
+                
+                // Prepend to chart data
+                const newDates = times.map(t => new Date(t * 1000).toLocaleString());
+                chartData.dates = [...newDates, ...chartData.dates];
+                chartData.prices = [...prices, ...chartData.prices];
+                
+                // Update chart
+                priceChart.data.labels = chartData.dates;
+                priceChart.data.datasets[0].data = chartData.prices;
+                priceChart.update();
+                
+                // Update text area
+                let txt = "";
+                for (let i = 0; i < times.length; i++) {
+                    const date = new Date(times[i] * 1000);
+                    txt += times[i] + "\t" + 
+                           date.toISOString().replace('T', ' ').substr(0, 19) + "\t" + 
+                           prices[i] + "\n";
+                }
+                
+                const currentData = document.getElementById("txtout").value;
+                document.getElementById("txtout").value = txt + currentData;
+                
+                document.getElementById("fromTime").value = times[0];
+                const fromDate = new Date(times[0] * 1000);
+                document.getElementById("fromInfo").innerHTML = fromDate.toLocaleString();
+                
+                statusBox.className = 'status success';
+                statusBox.innerHTML = `Added ${times.length} more data points`;
+            } catch (error) {
+                console.error('Fetch Error:', error);
+                statusBox.className = 'status error';
+                statusBox.innerHTML = `Error: ${error.message}`;
+            }
+        };
+
+        function restartData() {
+            if (confirm('Clear all data and start fresh?')) {
+                document.getElementById("txtout").value = "";
+                document.getElementById("fromTime").value = "—";
+                document.getElementById("toTime").value = "—";
+                document.getElementById("fromInfo").innerHTML = "";
+                document.getElementById("toInfo").innerHTML = "";
+                document.getElementById('statusBox').style.display = 'none';
+                
+                chartData = { dates: [], prices: [] };
+                priceChart.data.labels = [];
+                priceChart.data.datasets[0].data = [];
+                priceChart.update();
+                
+                getHistoricalData();
+            }
+        }
+
+        function downloadData() {
+            const data = document.getElementById("txtout").value;
+            if (!data || data.trim() === '') {
+                alert('No data to download');
+                return;
+            }
+            
+            const crypto = document.getElementById('cryptoCurr').value || 'BTC';
+            const timestamp = new Date().toISOString().split('T')[0];
+            const blob = new Blob([data], { type: 'text/csv;charset=utf-8;' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${crypto}_historical_data_${timestamp}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
